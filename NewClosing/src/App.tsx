@@ -1437,7 +1437,7 @@ export default function App() {
                     />
                     <span className="rounded-full bg-white/10 text-slate-200 text-xs px-2.5 py-0.5 border border-white/10">2026</span>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="hidden">
                     <div className="relative">
                         <label htmlFor="view-select-desktop" className="sr-only">View</label>
                         <select
@@ -1602,7 +1602,7 @@ export default function App() {
                 </div>
             </div>
 
-            <div className="sm:hidden flex items-center gap-2 flex-wrap">
+            <div className="hidden">
                 <button
                     onClick={() => setFilterText("")}
                     className="sm:hidden inline-flex items-center gap-2 rounded-xl bg-slate-800 text-white px-6 py-3 font-semibold text-lg shadow border border-white/10 hover:bg-slate-700 transition"
@@ -1723,7 +1723,7 @@ export default function App() {
     </div>{/* end sticky header */}
 
     {/* Active filters + quick shortcuts */}
-    {showFilters && (
+    {false && (
         <div className="flex flex-wrap items-center gap-2 text-xs text-slate-300">
             <span className="text-slate-400">Shortcuts: <b>/</b> search · <b>Esc</b> clear · <b>←/→</b> modal</span>
             {filterText.trim() && (
@@ -1910,147 +1910,33 @@ export default function App() {
      })()}
      </div>
 
-                {/* Month picker */}
                 {monthKeys.length === 0 ? (
-                    <div className="text-slate-400 mb-3">No months to display.</div>
+                    <div className="text-slate-400 text-lg mt-8">No closings to display.</div>
                 ) : (
-                    <div className="mb-3 flex flex-wrap items-center gap-2">
-                        <button
-                            onClick={() => { if (active > 0) { setActive(active - 1); setShowAll(false); } }}
-                            disabled={active <= 0}
-                            className={
-                                "rounded-lg px-3 py-2 text-sm font-semibold border transition " +
-                                (active <= 0 ? "bg-slate-800/50 text-slate-500 border-slate-800 cursor-not-allowed" : "bg-slate-800 text-slate-100 border-slate-700 hover:bg-slate-700")
-                            }
-                        >
-                            Prev
-                        </button>
-                        <div className="min-w-[220px] flex-1 sm:flex-none">
-                            <label htmlFor="month-select" className="sr-only">Select month</label>
-                            <select
-                                id="month-select"
-                                value={activeKey || ""}
-                                onChange={(e) => {
-                                    const key = e.target.value;
-                                    const idx = monthKeys.indexOf(key);
-                                    if (idx >= 0) {
-                                        setActive(idx);
-                                        setShowAll(false);
-                                    }
-                                }}
-                                className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-nvh-red"
-                            >
-                                {monthKeys.map((k) => {
-                                    const [yy, mm] = k.split("-").map(Number);
-                                    const label = `${monthLabels[mm - 1]} ${yy}`;
-                                    return (
-                                        <option key={k} value={k}>{label}</option>
-                                    );
-                                })}
-                            </select>
-                        </div>
-                        <button
-                            onClick={() => { if (active < monthKeys.length - 1) { setActive(active + 1); setShowAll(false); } }}
-                            disabled={active >= monthKeys.length - 1}
-                            className={
-                                "rounded-lg px-3 py-2 text-sm font-semibold border transition " +
-                                (active >= monthKeys.length - 1 ? "bg-slate-800/50 text-slate-500 border-slate-800 cursor-not-allowed" : "bg-slate-800 text-slate-100 border-slate-700 hover:bg-slate-700")
-                            }
-                        >
-                            Next
-                        </button>
+                    <div className="space-y-8">
+                        {monthKeys.map((key) => {
+                            const monthRows = grouped.get(key) || [];
+                            if (monthRows.length === 0) return null;
+
+                            return (
+                                <motion.div
+                                    key={key}
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.25 }}
+                                >
+                                    <MonthPanel
+                                        monthKey={key}
+                                        rows={monthRows}
+                                        onJobClick={handleJobClick}
+                                        stageChecks={stageChecks}
+                                        compactCards={compactCards}
+                                    />
+                                </motion.div>
+                            );
+                        })}
                     </div>
                 )}
-
-                 <AnimatePresence mode="wait">
-                     {filterText.trim() ? (
-                          <motion.div
-                              key="search-results"
-                              initial={{ opacity: 0, y: 8 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -8 }}
-                              transition={{ duration: 0.25 }}
-                          >
-                              <AllClosingsPanel
-                                  rows={[...rows].sort((a, b) => {
-                                      const toTime = (s?: string) => (s ? new Date(s + 'T00:00:00').getTime() : NaN);
-                                      const ta = toTime(a.expected_closing_date);
-                                      const tb = toTime(b.expected_closing_date);
-                                      const va = isNaN(ta) ? Infinity : ta;
-                                      const vb = isNaN(tb) ? Infinity : tb;
-                                      return va - vb;
-                                  })}
-                                  onJobClick={handleJobClick}
-                                  stageChecks={stageChecks}
-                                  compactCards={compactCards}
-                              />
-                          </motion.div>
-                     ) : showDieter ? (
-                          <motion.div
-                              key="dieter-view"
-                              initial={{ opacity: 0, y: 8 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -8 }}
-                              transition={{ duration: 0.25 }}
-                          >
-                              <DieterPanel rows={dieterRows} onJobClick={handleJobClick} stageChecks={stageChecks} compactCards={compactCards} />
-                          </motion.div>
-                     ) : showSpecs ? (
-                         <motion.div
-                             key="specs-view"
-                             initial={{ opacity: 0, y: 8 }}
-                             animate={{ opacity: 1, y: 0 }}
-                             exit={{ opacity: 0, y: -8 }}
-                             transition={{ duration: 0.25 }}
-                         >
-                             <AllClosingsPanel rows={specRows} onJobClick={handleJobClick} stageChecks={stageChecks} compactCards={compactCards} />
-                         </motion.div>
-                     ) : showPermitApp ? (
-                        <motion.div
-                            key="permit-view"
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -8 }}
-                            transition={{ duration: 0.25 }}
-                        >
-                            <AllClosingsPanel rows={permitRows} onJobClick={handleJobClick} stageChecks={stageChecks} compactCards={compactCards} />
-                        </motion.div>
-                      ) : showAll ? (
-                          <motion.div
-                              key="all-closings"
-                              initial={{ opacity: 0, y: 8 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -8 }}
-                              transition={{ duration: 0.25 }}
-                          >
-                              <AllClosingsPanel
-                                  rows={[...rows].sort((a, b) => {
-                                      const da = new Date((a.expected_closing_date || "") + "T00:00:00").getTime();
-                                      const db = new Date((b.expected_closing_date || "") + "T00:00:00").getTime();
-                                      const va = isNaN(da) ? Infinity : da;
-                                      const vb = isNaN(db) ? Infinity : db;
-                                      return va - vb;
-                                  })}
-
-                                  onJobClick={handleJobClick}
-
-                                  stageChecks={stageChecks}
-                                  compactCards={compactCards}
-                              />
-                          </motion.div>
-                      ) : monthKeys.length === 0 || !activeKey ? (
-                          <div className="text-slate-400 text-lg mt-8">No closings to display.</div>
-                      ) : (
-                          <motion.div key={activeKey}
-                              initial={{ opacity: 0, y: 8 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -8 }}
-                              transition={{ duration: 0.25 }}
-                          >
-                              <MonthPanel monthKey={activeKey} rows={grouped.get(activeKey) || []} onJobClick={handleJobClick} stageChecks={stageChecks} compactCards={compactCards} />
-                          </motion.div>
-                      )}
-                 </AnimatePresence>
 
                  {/* New alert component for empty data */}
                  {!loading && rows.length === 0 && (
