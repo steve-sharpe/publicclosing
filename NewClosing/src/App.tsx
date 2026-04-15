@@ -769,18 +769,7 @@ export default function App() {
         const idx = monthKeys.indexOf(key);
         return idx >= 0 ? idx : 0;
     });
-     const activeKey = monthKeys[active];
-     const viewMode = showAll
-         ? "all"
-         : showDieter
-         ? "dieter"
-         : showSpecs
-         ? "specs"
-         : showPermitApp
-         ? "permit"
-         : tvMode
-         ? "tv"
-         : "month";
+    const activeKey = monthKeys[active];
 
      const toTime = (s?: string) => (s ? new Date(s + 'T00:00:00').getTime() : NaN);
      const sortByClosingAsc = (a: ClosingRow, b: ClosingRow) => {
@@ -821,15 +810,10 @@ export default function App() {
      }, [parsedRows]);
  
      // The list used for modal Prev/Next should follow what the user is currently looking at.
-     const currentList = useMemo(() => {
+    const currentList = useMemo(() => {
         if (isMobile) return mobileOpenRows;
-         if (filterText.trim()) return [...rows].sort(sortByClosingAsc);
-         if (showDieter) return dieterRows;
-         if (showSpecs) return specRows;
-         if (showPermitApp) return permitRows;
-         if (showAll) return [...rows].sort(sortByClosingAsc);
-         return grouped.get(activeKey) || [];
-    }, [isMobile, mobileOpenRows, filterText, rows, showDieter, dieterRows, showSpecs, specRows, showPermitApp, permitRows, showAll, grouped, activeKey]);
+        return [...rows].sort(sortByClosingAsc);
+    }, [isMobile, mobileOpenRows, rows]);
 
      const currentIndex = useMemo(() => {
          if (!stageModal) return -1;
@@ -923,22 +907,6 @@ export default function App() {
         return () => window.clearInterval(id);
     }, [fullscreenMode, fullscreenOpenRows.length, showProgressChart]);
 
-    // TV mode auto-rotates months when in Month view.
-    useEffect(() => {
-        if (!tvMode) return;
-        if (stageModal) return;
-        if (filterText.trim()) return;
-        if (showAll || showDieter || showSpecs || showPermitApp) return;
-        if (!monthKeys.length) return;
-
-        const id = window.setInterval(() => {
-            setActive(a => (a + 1) % monthKeys.length);
-            try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch { window.scrollTo(0, 0); }
-        }, Math.max(3, AUTO_ROTATE_SECONDS) * 1000);
-
-        return () => window.clearInterval(id);
-    }, [tvMode, stageModal, filterText, showAll, showDieter, showSpecs, showPermitApp, monthKeys.length]);
- 
      const currentJob = useMemo(() => {
          if (!stageModal?.jobId) return undefined;
          // Use parsedRows to ensure we can find any job by id
