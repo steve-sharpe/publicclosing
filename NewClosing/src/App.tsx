@@ -1340,19 +1340,6 @@ export default function App() {
                         />
                     </div>
 
-                    {stageModal && (
-                        <StageModal
-                            jobId={stageModal.jobId}
-                            address={currentJob?.address || ""}
-                            stages={stageChecks[stageModal.jobId] || {}}
-                            onClose={() => setStageModal(null)}
-                            onSave={handleSaveStages}
-                            onPrev={openPrevJob}
-                            onNext={openNextJob}
-                            hasPrev={hasPrev}
-                            hasNext={hasNext}
-                        />
-                    )}
                 </div>
             </div>
         );
@@ -2118,19 +2105,6 @@ export default function App() {
                  </div>*/}
                </div>
 
-        {stageModal && (
-            <StageModal
-                jobId={stageModal.jobId}
-                address={currentJob?.address || ""}
-                stages={stageChecks[stageModal.jobId] || {}}
-                onClose={() => setStageModal(null)}
-                onSave={handleSaveStages}
-                onPrev={openPrevJob}
-                onNext={openNextJob}
-                hasPrev={hasPrev}
-                hasNext={hasNext}
-            />
-        )}
         {showProgressChart && (
             <ProgressChartView
                 rows={parsedRows}
@@ -2250,8 +2224,7 @@ function ClosingCard({ row, onJobClick, stageChecks, compactCards }: { row: Clos
  
      return (
          <motion.div
-             onClick={() => onJobClick(row.id)}
-             style={{ cursor: "pointer", minWidth: "340px" }} // <-- Added minWidth for wider cards
+             style={{ minWidth: "340px" }} // <-- Added minWidth for wider cards
              whileHover={{
                  y: -6,
                  scale: 1.04,
