@@ -423,7 +423,7 @@ export default function App() {
      const [showSpecs, setShowSpecs] = useState(false);
      const [showPermitApp, setShowPermitApp] = useState(false);
      const [tvMode, setTvMode] = useState(false);
-     const [compactCards, setCompactCards] = useState(true);
+    const [compactCards, setCompactCards] = useState(false);
     const [showFilters, setShowFilters] = useState(true);
     const [showBackToTop, setShowBackToTop] = useState(false);
     const [fullscreenMode, setFullscreenMode] = useState(false);
