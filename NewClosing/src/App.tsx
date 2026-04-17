@@ -1437,163 +1437,49 @@ export default function App() {
                     />
                     <span className="rounded-full bg-white/10 text-slate-200 text-xs px-2.5 py-0.5 border border-white/10">2026</span>
                 </div>
-                <div className="hidden">
-                    <div className="relative">
-                        <label htmlFor="view-select-desktop" className="sr-only">View</label>
-                        <select
-                            id="view-select-desktop"
-                            value=""
-                            onChange={(e) => {
+                <div className="flex items-center gap-2 flex-wrap">
+                    <div className="relative w-[220px] lg:w-[320px]">
+                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-nvh-red pointer-events-none" />
+                        <input
+                            ref={inputRef}
+                            type="search"
+                            placeholder="Filter by address, client, or status…"
+                            value={filterText}
+                            onChange={e => {
                                 const v = e.target.value;
-                                if (v === "month") {
-                                    setShowAll(false); setShowDieter(false); setShowSpecs(false); setShowPermitApp(false); setTvMode(false);
-                                } else if (v === "all") {
-                                    setShowAll(true); setShowDieter(false); setShowSpecs(false); setShowPermitApp(false); setTvMode(false);
-                                } else if (v === "dieter") {
-                                    setShowDieter(true); setShowAll(false); setShowSpecs(false); setShowPermitApp(false); setTvMode(false);
-                                } else if (v === "specs") {
-                                    setShowSpecs(true); setShowAll(false); setShowDieter(false); setShowPermitApp(false); setTvMode(false);
-                                } else if (v === "permit") {
-                                    setShowPermitApp(true); setShowAll(false); setShowDieter(false); setShowSpecs(false); setTvMode(false);
-                                } else if (v === "tv") {
-                                    setTvMode(true); setFilterText(''); setShowAll(false); setShowDieter(false); setShowSpecs(false); setShowPermitApp(false);
-                                }
+                                setFilterText(v);
+                                if (/\d/.test(v)) setShowSuggestions(true); else setShowSuggestions(false);
                             }}
-                            className="inline-flex items-center rounded-xl bg-slate-800 text-slate-100 border border-slate-700 px-3 py-2 text-sm font-semibold shadow hover:bg-slate-700 transition w-32"
-                            title="View mode"
-                        >
-                            <option value="">View</option>
-                            <option value="month">Month View</option>
-                            <option value="all">All Closings</option>
-                            <option value="dieter">Dieter</option>
-                            <option value="specs">Specs</option>
-                            <option value="permit">Permit App</option>
-                            <option value="tv">TV Mode</option>
-                        </select>
-                    </div>
-
-                    {showFilters && (
-                        <div className="relative w-[220px] lg:w-[320px]">
-                            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-nvh-red pointer-events-none" />
-                            <input
-                                ref={inputRef}
-                                type="search"
-                                placeholder="Filter by address, client, or status…"
-                                value={filterText}
-                                onChange={e => {
-                                    const v = e.target.value;
-                                    setFilterText(v);
-                                    if (/\d/.test(v)) setShowSuggestions(true); else setShowSuggestions(false);
+                            onFocus={() => {
+                                if (/\d/.test(filterText)) setShowSuggestions(true); else setShowSuggestions(false);
+                            }}
+                            onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
+                            inputMode="search"
+                            enterKeyHint="search"
+                            autoComplete="new-password"
+                            autoCorrect="off"
+                            autoCapitalize="none"
+                            spellCheck={false}
+                            name="search_no_autofill"
+                            className="w-full rounded-xl bg-slate-800 border border-slate-700 pl-9 pr-3 py-2 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-nvh-red text-sm"
+                        />
+                        {showSuggestions && (
+                            <MobileSuggestions
+                                anchorRect={anchorRect}
+                                topProvider={computeAnchorRect}
+                                inputRef={inputRef}
+                                rows={searchableRows}
+                                filterText={filterText}
+                                setFilterText={setFilterText}
+                                onHide={() => setShowSuggestions(false)}
+                                onSelectJob={(row) => {
+                                    setShowSuggestions(false);
+                                    setFilterText(row.address || "");
+                                    onSelectJob(row);
                                 }}
-                                onFocus={() => {
-                                    if (/\d/.test(filterText)) setShowSuggestions(true); else setShowSuggestions(false);
-                                }}
-                                onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
-                                inputMode="search"
-                                enterKeyHint="search"
-                                autoComplete="new-password"
-                                autoCorrect="off"
-                                autoCapitalize="none"
-                                spellCheck={false}
-                                name="search_no_autofill"
-                                className="w-full rounded-xl bg-slate-800 border border-slate-700 pl-9 pr-3 py-2 text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-nvh-red text-sm"
                             />
-                            {showSuggestions && (
-                                <MobileSuggestions
-                                    anchorRect={anchorRect}
-                                    topProvider={computeAnchorRect}
-                                    inputRef={inputRef}
-                                    rows={searchableRows}
-                                    filterText={filterText}
-                                    setFilterText={setFilterText}
-                                    onHide={() => setShowSuggestions(false)}
-                                    onSelectJob={(row) => {
-                                        setShowSuggestions(false);
-                                        setFilterText(row.address || "");
-                                        onSelectJob(row);
-                                    }}
-                                />
-                            )}
-                        </div>
-                    )}
-
-                    {showFilters && (
-                        <button
-                            onClick={() => setFilterText("")}
-                            className={
-                                "hidden sm:inline-flex items-center justify-center whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold border transition-all duration-200 " +
-                                (filterText.trim()
-                                    ? "bg-nvh-red text-white border-nvh-red hover:bg-nvh-redDark shadow"
-                                    : "bg-slate-800 text-slate-300 border-slate-700 cursor-pointer")
-                            }
-                            title="Clear search"
-                        >
-                            <XCircle className="h-4 w-4 mr-2" />
-                            Clear
-                        </button>
-                    )}
-
-                    <div className="relative">
-                        <label htmlFor="display-select-desktop" className="sr-only">Display</label>
-                        <select
-                            id="display-select-desktop"
-                            value=""
-                            onChange={(e) => setCompactCards(e.target.value === "compact")}
-                            className="inline-flex items-center rounded-xl bg-slate-800 text-slate-100 border border-slate-700 px-3 py-2 text-sm font-semibold shadow hover:bg-slate-700 transition w-28"
-                            title="Display density"
-                        >
-                            <option value="">Display</option>
-                            <option value="compact">Compact</option>
-                            <option value="detailed">Detailed</option>
-                        </select>
+                        )}
                     </div>
-
-                    <button
-                        onClick={() => setShowFilters(v => !v)}
-                        className="inline-flex items-center gap-2 rounded-xl bg-slate-800 text-slate-100 border border-slate-700 px-3 py-2 font-semibold text-sm shadow hover:bg-slate-700 transition"
-                        title="Toggle filters"
-                    >
-                        <Filter className="h-4 w-4" />
-                        {showFilters ? "Hide Filters" : "Show Filters"}
-                    </button>
-
-                    <details className="relative">
-                        <summary className="list-none inline-flex items-center gap-2 rounded-xl bg-slate-800 text-slate-100 border border-slate-700 px-3 py-2 font-semibold text-sm shadow hover:bg-slate-700 transition cursor-pointer">
-                            More
-                        </summary>
-                        <div className="absolute right-0 mt-2 w-52 rounded-lg bg-slate-800 border border-slate-700 shadow-lg z-50 overflow-hidden">
-                            <button
-                                onClick={handlePrint8WeekReport}
-                                className="w-full text-left px-4 py-2 text-sm text-slate-100 hover:bg-slate-700 font-semibold border-b border-slate-700"
-                            >
-                                8-Week Closing Report
-                            </button>
-                            <button
-                                onClick={handlePrintSelections}
-                                className="w-full text-left px-4 py-2 text-sm text-slate-100 hover:bg-slate-700"
-                            >
-                                Print Selections
-                            </button>
-                            <button
-                                onClick={handleExportSelections}
-                                className="w-full text-left px-4 py-2 text-sm text-slate-100 hover:bg-slate-700"
-                            >
-                                Export CSV
-                            </button>
-                            <button
-                                onClick={() => setShowProgressChart(true)}
-                                className="w-full text-left px-4 py-2 text-sm text-slate-100 hover:bg-slate-700"
-                            >
-                                Project Progress Graph
-                            </button>
-                            <button
-                                onClick={toggleFullscreen}
-                                className="w-full text-left px-4 py-2 text-sm text-slate-100 hover:bg-slate-700"
-                            >
-                                Fullscreen
-                            </button>
-                        </div>
-                    </details>
                 </div>
                 <div className="flex flex-col lg:items-end gap-2">
                     <div className="text-xs text-slate-400">
