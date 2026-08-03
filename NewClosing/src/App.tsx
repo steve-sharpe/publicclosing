@@ -117,11 +117,23 @@ function parseCSV(text: string): ClosingRow[] {
         };
 
         const address = get("address").trim();
-        const expectedClosing = get("expected closing date").trim();
+        const getClosingDate = () => {
+            const candidates = [
+                "expected closing date",
+                "current closing date",
+                "closing date",
+            ];
+            for (const key of candidates) {
+                const value = get(key).trim();
+                if (value) return value;
+            }
+            return "";
+        };
+        const expectedClosing = getClosingDate();
         // Only require address; allow missing expected closing date so search can find these rows
         if (!address) continue;
 
-        const all_dates = ["expected closing date"]
+        const all_dates = ["expected closing date", "current closing date", "closing date"]
             .map(col => normalizeDate(get(col)))
             .filter(date => date && date !== "");
 
